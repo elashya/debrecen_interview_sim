@@ -5,8 +5,8 @@ import tempfile
 import os
 import numpy as np
 import soundfile as sf
+import ffmpeg
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, AudioProcessorBase
-from pydub import AudioSegment
 import time
 
 # ✅ OpenAI client
@@ -108,15 +108,14 @@ def record_audio(key):
 
     return None
 
-# === TRANSCRIBE AUDIO (includes AMR → WAV conversion) ===
+# === TRANSCRIBE AUDIO (using ffmpeg for .amr) ===
 def transcribe_audio(audio_path):
     try:
         ext = os.path.splitext(audio_path)[-1].lower()
 
         if ext == ".amr":
             converted_path = audio_path.replace(".amr", ".wav")
-            sound = AudioSegment.from_file(audio_path, format="amr")
-            sound.export(converted_path, format="wav")
+            ffmpeg.input(audio_path).output(converted_path).run(overwrite_output=True)
             audio_path = converted_path
 
         with open(audio_path, "rb") as f:
