@@ -7,10 +7,10 @@ import numpy as np
 import soundfile as sf
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, AudioProcessorBase
 
-# ✅ Initialize OpenAI client
+# ✅ OpenAI client
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# === GPT-BASED QUESTION GENERATION ===
+# === GPT QUESTION GENERATION ===
 def ask_gpt_question(history, topic):
     messages = [
         {"role": "system", "content": f"""You are conducting a University of Debrecen entrance interview.
@@ -33,7 +33,8 @@ Avoid repeating previous questions."""}
 
     return response.choices[0].message.content.strip()
 
-# === TEXT TO SPEECH ===
+
+# === TTS SPEAKING ===
 def speak_text(text):
     response = client.audio.speech.create(
         model="tts-1",
@@ -47,7 +48,8 @@ def speak_text(text):
 
     st.audio(tmpfile_path, format="audio/mp3")
 
-# === AUDIO PROCESSOR FOR WEBRTC ===
+
+# === AUDIO PROCESSOR CLASS ===
 class AudioProcessor(AudioProcessorBase):
     def __init__(self) -> None:
         self.recorded_frames = []
@@ -57,7 +59,8 @@ class AudioProcessor(AudioProcessorBase):
         self.recorded_frames.append(audio)
         return frame
 
-# === RECORD AUDIO FROM MIC ===
+
+# === RECORD AUDIO USING MIC ===
 def record_audio(key):
     st.markdown("🎙️ Please record your answer using the microphone below:")
     ctx = webrtc_streamer(
@@ -71,10 +74,10 @@ def record_audio(key):
     audio_path = None
     if ctx.state.playing:
         st.info("⏺️ Recording... Speak now.")
-    elif ctx.state.audio_receiver:
+
+    elif ctx.audio_receiver:  # ✅ FIXED: use top-level ctx.audio_receiver
         processor = ctx.audio_processor
         if processor and processor.recorded_frames:
-            # Save as .wav
             audio_data = np.concatenate(processor.recorded_frames, axis=0).astype(np.int16)
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
                 sf.write(f.name, audio_data, 48000)
@@ -82,7 +85,8 @@ def record_audio(key):
                 st.success("✅ Recording complete!")
     return audio_path
 
-# === TRANSCRIBE AUDIO WITH WHISPER ===
+
+# === TRANSCRIBE AUDIO ===
 def transcribe_audio(audio_path):
     try:
         with open(audio_path, "rb") as f:
