@@ -81,4 +81,4 @@ def run_interview():
             </script>
         """, height=0)
 
-        st.experimental_rerun()
+        st.rerun()
