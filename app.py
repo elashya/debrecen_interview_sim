@@ -15,12 +15,14 @@ if not st.session_state.authenticated:
     if password == st.secrets["APP_PIN"]:
         st.session_state.authenticated = True
         st.success("✅ Access granted. Loading app...")
-        st.stop()  # Stop and rerun will naturally occur on next page load
+        st.experimental_rerun()  # ✅ Forces instant reload with new session state
+
     
     elif password:
         st.error("❌ Incorrect password. Please try again.")
     
     st.stop()
+
 
 
 # === Page Setup ===
