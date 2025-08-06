@@ -1,4 +1,3 @@
-# feedback.py
 import streamlit as st
 from openai import OpenAI
 from utils import speak_text
@@ -16,24 +15,24 @@ def generate_feedback(qa_history):
     for qa in qa_history:
         topic_groups[qa["topic"]].append(qa)
 
-    # === GPT prompt ===
+    # === GPT prompt (updated scores) ===
     messages = [{"role": "system", "content": """You are an entrance interview evaluator for the University of Debrecen.
 The student just completed a voice interview. You will:
 
 1. Review all Q&A by topic.
 2. Give brief topic-specific feedback.
 3. Assign a score per topic:
-   - Personal: out of 2
-   - Biology: out of 3
-   - Chemistry: out of 3
-4. Give an overall mark (out of 8) and likelihood of acceptance.
+   - Personal: out of 3
+   - Biology: out of 4
+   - Chemistry: out of 4
+4. Give an overall mark (out of 11) and likelihood of acceptance.
 
 Be supportive but honest. Format output clearly."""}]
 
     for topic in ["personal", "biology", "chemistry"]:
         qas = topic_groups[topic]
         for qa in qas:
-            messages.append({"role": "user", "content": f"{topic.upper()} | Question: {qa['question']}"})
+            messages.append({"role": "user", "content": f"{topic.upper()} | Question: {qa['question']}"} )
             messages.append({"role": "assistant", "content": f"Answer: {qa['answer']}"})
 
     messages.append({"role": "user", "content": "Please evaluate and score by topic."})
