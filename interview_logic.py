@@ -49,11 +49,11 @@ def run_interview():
         current_topic = st.session_state.current_topic
         topic_count = len([q for q in qa if q['topic'] == current_topic])
 
-        if current_topic == "personal" and topic_count >= 2:
+        if current_topic == "personal" and topic_count >= 3:
             st.session_state.current_topic = "biology"
-        elif current_topic == "biology" and topic_count >= 3:
+        elif current_topic == "biology" and topic_count >= 4:
             st.session_state.current_topic = "chemistry"
-        elif current_topic == "chemistry" and topic_count >= 3:
+        elif current_topic == "chemistry" and topic_count >= 4:
             st.success("✅ Interview completed!")
             st.session_state.interview_done = True
             return
@@ -72,7 +72,7 @@ def run_interview():
     # === Progress display (always accurate)
     qa = st.session_state.qa_history
     total_answered = len(qa)
-    total_expected = 8
+    total_expected = 11
     percent_complete = int((total_answered / total_expected) * 100)
     current_topic = st.session_state.current_topic
 
