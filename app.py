@@ -46,7 +46,9 @@ if "interview_started" not in st.session_state:
 if not st.session_state.interview_started:
     if st.button("🎤 Start Interview"):
         st.session_state.interview_started = True
-        st.experimental_rerun()
+        st.success("✅ Interview starting... Please wait.")
+        st.stop()
+
 else:
     # === Run the main interview ===
     run_interview()
