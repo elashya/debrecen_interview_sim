@@ -1,8 +1,7 @@
-openai
 streamlit
-requests
 streamlit-webrtc
-av
+openai
 numpy
 soundfile
+av
 pydub
