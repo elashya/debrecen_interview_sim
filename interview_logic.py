@@ -1,5 +1,3 @@
-# interview_logic.py
-
 import streamlit as st
 import streamlit.components.v1 as components
 from utils import speak_text, record_audio, transcribe_audio, ask_gpt_question
@@ -74,11 +72,11 @@ def run_interview():
 
         st.session_state.question_index += 1
 
-        # 🔄 Scroll to next question
+        # === Scroll to top and rerun ===
         components.html("""
             <script>
                 window.location.href = "#question-area";
             </script>
         """, height=0)
 
-        st.rerun()
+        st.rerun()  # ✅ Fixed line here
