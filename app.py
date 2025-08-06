@@ -15,7 +15,7 @@ if not st.session_state.authenticated:
     if password == st.secrets["APP_PIN"]:
         st.session_state.authenticated = True
         st.success("✅ Access granted. Loading app...")
-        st.experimental_rerun()  # ✅ Force reload to continue
+        st.rerun()  # ✅ Force reload to continue
     elif password:
         st.error("❌ Incorrect password. Please try again.")
 
@@ -44,7 +44,7 @@ if not st.session_state.interview_started:
     if st.button("🎤 Start Interview"):
         st.session_state.interview_started = True
         st.success("✅ Interview starting... Please wait.")
-        st.experimental_rerun()
+        st.rerun()
 else:
     run_interview()
 
