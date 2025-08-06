@@ -82,4 +82,4 @@ def run_interview():
     st.markdown(f"- 🧪 **Current Topic:** `{current_topic.capitalize()}`")
 
     if total_answered > 0:
-        st.markdown("- 🧠 **Estimated Score:** 🔄 Estimating… *(Final score at the end)*")
+        #st.markdown("- 🧠 **Estimated Score:** 🔄 Estimating… *(Final score at the end)*")
