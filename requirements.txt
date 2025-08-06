@@ -5,3 +5,4 @@ numpy
 soundfile
 av
 pydub
+ffmpeg-python
