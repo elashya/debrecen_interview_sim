@@ -83,3 +83,4 @@ def run_interview():
 
     if total_answered > 0:
         #st.markdown("- 🧠 **Estimated Score:** 🔄 Estimating… *(Final score at the end)*")
+        pass
