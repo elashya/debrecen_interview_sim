@@ -1,3 +1,7 @@
 openai
 streamlit
 requests
+streamlit-webrtc
+av
+numpy
+soundfile
