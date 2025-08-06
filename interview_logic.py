@@ -23,7 +23,7 @@ def run_interview():
         topic=st.session_state.current_topic
     )
     speak_text(question)
-    st.markdown(f"**{question}**")
+    #st.markdown(f"**{question}**")
 
     # === Upload and transcribe ===
     audio_file = record_audio(key=f"audio_{st.session_state.question_index}")
