@@ -1,12 +1,12 @@
 # utils.py
 import streamlit as st
-import openai
+from openai import OpenAI
 import tempfile
-import base64
-import requests
 import os
+import requests
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# ✅ Use new OpenAI client (required for v1)
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def ask_gpt_question(history, topic):
     messages = [
@@ -23,22 +23,27 @@ Avoid repeating previous questions."""}
 
     messages.append({"role": "user", "content": f"Please ask the next {topic} question."})
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages
     )
 
     return response.choices[0].message.content.strip()
 
+
 def speak_text(text):
-    response = openai.audio.speech.create(
+    response = client.audio.speech.create(
         model="tts-1",
         voice="shimmer",  # Options: alloy, echo, fable, onyx, nova, shimmer
         input=text
     )
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
         tmpfile.write(response.content)
-        st.audio(tmpfile.name, format="audio/mp3")
+        tmpfile_path = tmpfile.name
+
+    st.audio(tmpfile_path, format="audio/mp3")
+
 
 def record_audio(key):
     audio_bytes = st.audio_recorder("🎙️ Record your answer", key=key)
@@ -48,15 +53,15 @@ def record_audio(key):
             return f.name
     return None
 
+
 def transcribe_audio(audio_path):
     try:
         with open(audio_path, "rb") as f:
-            transcript = openai.audio.transcriptions.create(
+            transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=f
             )
         return transcript.text
     except Exception as e:
-        st.error(f"Transcription error: {str(e)}")
+        st.error(f"❌ Transcription error: {str(e)}")
         return None
-
