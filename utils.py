@@ -33,7 +33,6 @@ Avoid repeating previous questions."""}
 
     return response.choices[0].message.content.strip()
 
-
 # === TTS SPEAKING ===
 def speak_text(text):
     response = client.audio.speech.create(
@@ -48,7 +47,6 @@ def speak_text(text):
 
     st.audio(tmpfile_path, format="audio/mp3")
 
-
 # === AUDIO PROCESSOR CLASS ===
 class AudioProcessor(AudioProcessorBase):
     def __init__(self) -> None:
@@ -59,13 +57,18 @@ class AudioProcessor(AudioProcessorBase):
         self.recorded_frames.append(audio)
         return frame
 
-
-# === RECORD AUDIO USING MIC ===
+# === RECORD AUDIO WITH STUN SUPPORT ===
 def record_audio(key):
     st.markdown("🎙️ Please record your answer using the microphone below:")
+
+    rtc_config = {
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+    }
+
     ctx = webrtc_streamer(
         key=f"webrtc-{key}",
         mode=WebRtcMode.SENDONLY,
+        rtc_configuration=rtc_config,  # ✅ STUN server added
         audio_receiver_size=1024,
         media_stream_constraints={"audio": True, "video": False},
         audio_processor_factory=AudioProcessor,
@@ -75,7 +78,7 @@ def record_audio(key):
     if ctx.state.playing:
         st.info("⏺️ Recording... Speak now.")
 
-    elif ctx.audio_receiver:  # ✅ FIXED: use top-level ctx.audio_receiver
+    elif ctx.audio_receiver:
         processor = ctx.audio_processor
         if processor and processor.recorded_frames:
             audio_data = np.concatenate(processor.recorded_frames, axis=0).astype(np.int16)
@@ -84,7 +87,6 @@ def record_audio(key):
                 audio_path = f.name
                 st.success("✅ Recording complete!")
     return audio_path
-
 
 # === TRANSCRIBE AUDIO ===
 def transcribe_audio(audio_path):
