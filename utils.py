@@ -6,6 +6,7 @@ import os
 import numpy as np
 import soundfile as sf
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, AudioProcessorBase
+from pydub import AudioSegment
 import time
 
 # ✅ OpenAI client
@@ -57,7 +58,7 @@ class AudioProcessor(AudioProcessorBase):
         self.recorded_frames.append(audio)
         return frame
 
-# === AUDIO RECORDER WITH FALLBACK ===
+# === AUDIO RECORDER WITH FALLBACK & STUN ===
 def record_audio(key):
     st.markdown("🎙️ Please record your answer using the microphone below:")
 
@@ -79,7 +80,6 @@ def record_audio(key):
 
     if ctx.state.playing:
         st.info("⏺️ Recording... Speak now.")
-
         start_time = time.time()
         while ctx.audio_receiver is None and time.time() - start_time < timeout_seconds:
             time.sleep(0.2)
@@ -96,7 +96,11 @@ def record_audio(key):
 
     # === Fallback: File Upload ===
     st.warning("🎤 Recording failed or unavailable. Please upload your answer.")
-    uploaded = st.file_uploader("📁 Upload your voice answer (MP3/WAV/WebM)", type=["mp3", "wav", "webm"], key=f"fallback-{key}")
+    uploaded = st.file_uploader(
+        "📁 Upload your voice answer (MP3/WAV/WebM/M4A/AMR)",
+        type=["mp3", "wav", "webm", "m4a", "amr"],
+        key=f"fallback-{key}"
+    )
     if uploaded:
         with tempfile.NamedTemporaryFile(delete=False, suffix=f".{uploaded.name.split('.')[-1]}") as f:
             f.write(uploaded.read())
@@ -104,15 +108,24 @@ def record_audio(key):
 
     return None
 
-# === TRANSCRIBE AUDIO ===
+# === TRANSCRIBE AUDIO (includes AMR → WAV conversion) ===
 def transcribe_audio(audio_path):
     try:
+        ext = os.path.splitext(audio_path)[-1].lower()
+
+        if ext == ".amr":
+            converted_path = audio_path.replace(".amr", ".wav")
+            sound = AudioSegment.from_file(audio_path, format="amr")
+            sound.export(converted_path, format="wav")
+            audio_path = converted_path
+
         with open(audio_path, "rb") as f:
             transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=f
             )
         return transcript.text
+
     except Exception as e:
         st.error(f"❌ Transcription error: {str(e)}")
         return None
