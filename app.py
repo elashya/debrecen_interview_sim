@@ -15,15 +15,11 @@ if not st.session_state.authenticated:
     if password == st.secrets["APP_PIN"]:
         st.session_state.authenticated = True
         st.success("✅ Access granted. Loading app...")
-        st.experimental_rerun()  # ✅ Forces instant reload with new session state
-
-    
+        st.experimental_rerun()  # ✅ Force reload to continue
     elif password:
         st.error("❌ Incorrect password. Please try again.")
-    
+
     st.stop()
-
-
 
 # === Page Setup ===
 st.set_page_config(page_title="Debrecen Interview Simulator", layout="centered")
@@ -40,22 +36,19 @@ You'll receive **spoken questions** in three parts:
 🎙️ You’ll **respond using your voice**, and receive detailed **text + audio feedback** at the end.
 """)
 
-# === State Initialization ===
+# === Interview Start ===
 if "interview_started" not in st.session_state:
     st.session_state.interview_started = False
 
-# === Start Button ===
 if not st.session_state.interview_started:
     if st.button("🎤 Start Interview"):
         st.session_state.interview_started = True
         st.success("✅ Interview starting... Please wait.")
-        st.stop()
-
+        st.experimental_rerun()
 else:
-    # === Run the main interview ===
     run_interview()
 
-    # === Show final feedback if interview is complete ===
+    # === Show final feedback ===
     if st.session_state.get("interview_done"):
         generate_feedback(st.session_state.qa_history)
 
