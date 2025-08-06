@@ -1,4 +1,5 @@
 # interview_logic.py
+
 import streamlit as st
 import streamlit.components.v1 as components
 from utils import speak_text, record_audio, transcribe_audio, ask_gpt_question
@@ -9,6 +10,8 @@ def run_interview():
         st.session_state.qa_history = []
         st.session_state.current_topic = "personal"
         st.session_state.question_index = 1
+        st.session_state.submitted = False
+        st.session_state.pending_answer = None
 
     qa = st.session_state.qa_history
     current_topic = st.session_state.current_topic
@@ -28,7 +31,6 @@ def run_interview():
 
     # === Auto-scroll anchor ===
     st.markdown("<a name='question-area'></a>", unsafe_allow_html=True)
-
     st.markdown(f"### ❓ Question {st.session_state.question_index}")
 
     # === Ask GPT for next question ===
@@ -36,47 +38,47 @@ def run_interview():
         history=qa,
         topic=current_topic
     )
-
-    # === Speak the question ===
     speak_text(question)
+    st.markdown(f"**{question}**")
 
-    # === Record user answer ===
+    # === Upload and transcribe ===
     audio_file = record_audio(key=f"audio_{st.session_state.question_index}")
 
     if audio_file:
-        user_answer = transcribe_audio(audio_file)
-
-        if user_answer:
-            st.markdown(f"🗣️ **Your Answer:** {user_answer}")
-
-            # === Save the Q&A ===
-            qa.append({
+        transcript = transcribe_audio(audio_file)
+        if transcript:
+            st.markdown(f"🗣️ **Your Answer:** {transcript}")
+            st.session_state.pending_answer = {
                 "question": question,
-                "answer": user_answer,
+                "answer": transcript,
                 "topic": current_topic
-            })
+            }
 
-            # === Topic transition logic ===
-            topic_count = len([q for q in qa if q['topic'] == current_topic])
+    # === Submit Answer Button ===
+    if st.session_state.get("pending_answer") and st.button("✅ Submit Answer"):
+        qa.append(st.session_state.pending_answer)
+        st.session_state.pending_answer = None
+        st.session_state.submitted = True
 
-            if current_topic == "personal" and topic_count >= 2:
-                st.session_state.current_topic = "biology"
-            elif current_topic == "biology" and topic_count >= 3:
-                st.session_state.current_topic = "chemistry"
-            elif current_topic == "chemistry" and topic_count >= 3:
-                st.success("✅ Interview completed!")
-                st.session_state.interview_done = True
-                return
+        # === Topic transition logic ===
+        topic_count = len([q for q in qa if q['topic'] == current_topic])
 
-            # === Next Question button + scroll logic ===
-            if st.button("➡️ Next Question"):
-                st.session_state.question_index += 1
+        if current_topic == "personal" and topic_count >= 2:
+            st.session_state.current_topic = "biology"
+        elif current_topic == "biology" and topic_count >= 3:
+            st.session_state.current_topic = "chemistry"
+        elif current_topic == "chemistry" and topic_count >= 3:
+            st.success("✅ Interview completed!")
+            st.session_state.interview_done = True
+            return
 
-                components.html("""
-                    <script>
-                        window.location.href = "#question-area";
-                    </script>
-                """, height=0)
+        st.session_state.question_index += 1
 
-                st.rerun()
+        # 🔄 Scroll to next question
+        components.html("""
+            <script>
+                window.location.href = "#question-area";
+            </script>
+        """, height=0)
 
+        st.experimental_rerun()
