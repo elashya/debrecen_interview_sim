@@ -76,11 +76,11 @@ def run_interview():
     percent_complete = int((total_answered / total_expected) * 100)
     current_topic = st.session_state.current_topic
 
-    st.markdown("### 📊 Interview Progress")
-    st.progress(percent_complete)
-    st.markdown(f"- ✅ **Answered:** {total_answered} / {total_expected}")
-    st.markdown(f"- 🧪 **Current Topic:** `{current_topic.capitalize()}`")
+ #   st.markdown("### 📊 Interview Progress")
+ #   st.progress(percent_complete)
+ #   st.markdown(f"- ✅ **Answered:** {total_answered} / {total_expected}")
+ #   st.markdown(f"- 🧪 **Current Topic:** `{current_topic.capitalize()}`")
 
-    if total_answered > 0:
-        #st.markdown("- 🧠 **Estimated Score:** 🔄 Estimating… *(Final score at the end)*")
-        pass
+ #   if total_answered > 0:
+ #       st.markdown("- 🧠 **Estimated Score:** 🔄 Estimating… *(Final score at the end)*")
+
