@@ -2,6 +2,8 @@
 import streamlit as st
 from interview_logic import run_interview
 from feedback import generate_feedback
+import streamlit.components.v1 as components
+
 
 # === Page Setup ===
 st.set_page_config(page_title="Debrecen Interview Simulator", layout="centered")
