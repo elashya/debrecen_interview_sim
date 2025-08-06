@@ -3,9 +3,9 @@ import streamlit as st
 from openai import OpenAI
 import tempfile
 import os
-import ffmpeg
+from pydub import AudioSegment
 
-# ✅ Required only for Whisper
+# ✅ OpenAI client
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # === GPT QUESTION GENERATION ===
@@ -19,8 +19,8 @@ Avoid repeating previous questions."""}
     ]
 
     for qa in history:
-        messages.append({"role": "user", "content": qa["question"]})
-        messages.append({"role": "assistant", "content": qa["answer"]})
+        messages.append({"role": "user", "content": f"{qa['question']}"})
+        messages.append({"role": "assistant", "content": f"{qa['answer']}"})
 
     messages.append({"role": "user", "content": f"Please ask the next {topic} question."})
 
@@ -58,14 +58,15 @@ def record_audio(key):
             return f.name
     return None
 
-# === TRANSCRIBE AUDIO (AMR → WAV using ffmpeg) ===
+# === TRANSCRIBE AUDIO (AMR → WAV using pydub) ===
 def transcribe_audio(audio_path):
     try:
         ext = os.path.splitext(audio_path)[-1].lower()
 
         if ext == ".amr":
             converted_path = audio_path.replace(".amr", ".wav")
-            ffmpeg.input(audio_path).output(converted_path).run(overwrite_output=True)
+            sound = AudioSegment.from_file(audio_path, format="amr")
+            sound.export(converted_path, format="wav")
             audio_path = converted_path
 
         with open(audio_path, "rb") as f:
