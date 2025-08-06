@@ -3,9 +3,8 @@ import streamlit as st
 from openai import OpenAI
 import tempfile
 import os
-import requests
 
-# ✅ Use new OpenAI client (required for v1)
+# ✅ Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def ask_gpt_question(history, topic):
@@ -34,7 +33,7 @@ Avoid repeating previous questions."""}
 def speak_text(text):
     response = client.audio.speech.create(
         model="tts-1",
-        voice="shimmer",  # Options: alloy, echo, fable, onyx, nova, shimmer
+        voice="shimmer",
         input=text
     )
 
@@ -46,10 +45,11 @@ def speak_text(text):
 
 
 def record_audio(key):
-    audio_bytes = st.audio_recorder("🎙️ Record your answer", key=key)
-    if audio_bytes:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as f:
-            f.write(audio_bytes)
+    st.markdown("🎙️ Please record your answer using your phone or computer and upload it below:")
+    audio_file = st.file_uploader("Upload your voice answer (MP3 or WebM)", type=["mp3", "webm"], key=key)
+    if audio_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{audio_file.name.split('.')[-1]}") as f:
+            f.write(audio_file.read())
             return f.name
     return None
 
